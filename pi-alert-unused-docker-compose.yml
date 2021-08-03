@@ -1,0 +1,62 @@
+version: "2.1"
+
+volumes:
+  pihole_config:
+  dnsmasq_config:
+  pialert_config:
+  pialert_db:
+  pialert_log:
+  pialert_pihole_config:
+  pialert_lighttpd_config:
+
+services:
+  # https://hub.docker.com/r/pihole/pihole
+  pihole:
+    build: ./pihole
+    privileged: true
+    volumes:
+      - "pihole_config:/etc/pihole"
+      - "dnsmasq_config:/etc/dnsmasq.d"
+    dns:
+      - "127.0.0.1"
+      - "1.1.1.1"
+    network_mode: host
+
+  # https://github.com/klutchell/unbound-dnscrypt
+  unbound:
+    build: ./unbound
+    privileged: true
+    ports:
+      - "5053:5053/tcp"
+      - "5053:5053/udp"
+
+  # https://github.com/balenablocks/fbcp
+  fbcp:
+    image: balenablocks/fbcp:1.0.0
+    privileged: true
+
+  # prevent plymouth from blocking fbcp
+  # https://github.com/klutchell/balena-pihole/issues/25
+  # https://github.com/balena-os/meta-balena/issues/1772
+  dbus:
+    build: dbus
+    restart: on-failure
+    labels:
+        io.balena.features.dbus: "1"
+
+  # https://github.com/pucherot/Pi.Alert
+  pialert:
+    privileged: true
+    image: bcollier42/pialert
+    container_name: pialert
+    depends_on:
+      - pihole
+    volumes:
+      - "pialert_config:/opt/pialert/config"
+      - "pialert_db:/opt/pialert/db"
+      - "pialert_log:/opt/pialert/log"
+      - "pialert_pihole_config:/etc/pihole"
+      - "dnsmasq_config:/etc/dnsmasq.d"
+      - "pialert_lighttpd_config:/etc/lighttpd"
+    network_mode: host
+      
