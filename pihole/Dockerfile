@@ -1,5 +1,6 @@
 # https://hub.docker.com/r/pihole/pihole/tags
-FROM pihole/pihole:2022.02.1
+FROM pihole/pihole:latest 
+# was 2022.02.1
 
 WORKDIR /usr/src/app
 
