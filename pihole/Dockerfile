@@ -1,5 +1,5 @@
 # https://hub.docker.com/r/pihole/pihole/tags
-FROM pihole/pihole:2021.11
+FROM pihole/pihole:2022.02.1
 
 WORKDIR /usr/src/app
 
@@ -10,13 +10,14 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # hadolint ignore=DL3008
 RUN apt-get update && \
-	apt-get install --no-install-recommends -y console-setup kmod dbus && \
+	apt-get install --no-install-recommends -y console-setup kmod dbus netcat && \
 	apt-get clean && rm -rf /var/lib/apt/lists/*
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG PADD_VERSION=3.6.2
-ARG PADD_SHA256=7e1fcfefc5c24bd032b31ed79afceda21019faeb88535cdf15ba558b90141c01
+# https://github.com/pi-hole/PADD/releases
+ARG PADD_VERSION=3.6.6
+ARG PADD_SHA256=80a0eb070aca810f25508a692c343180996a605d136eaf15301b5cd5f5752266
 
 RUN curl -fsSL https://github.com/pi-hole/PADD/archive/v${PADD_VERSION}.tar.gz -o padd.tar.gz && \
 	echo "${PADD_SHA256}  padd.tar.gz" | sha256sum -c - && \
